@@ -1,6 +1,8 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs').promises;
+const crypto = require('crypto');
+const { isValidEmail, isValidPassword } = require('./middleweres/validator');
 
 const app = express();
 app.use(express.json());
@@ -8,7 +10,7 @@ app.use(express.json());
 const HTTP_OK_STATUS = 200;
 const PORT = process.env.PORT || '3001';
 
-const talkerRoute = './talker.json'
+const talkerRoute = './talker.json';
 
 app.get('/talker', async (req, res) => {
   const talker = await fs.readFile(path.resolve(__dirname, talkerRoute));
@@ -23,9 +25,16 @@ app.get('/talker/:id', async (req, res) => {
   const resul = data.find((a) => a.id === +id);
   if (resul) {
     return res.status(HTTP_OK_STATUS).json(resul);
-  };
+  }
+
   return res.status(404).json({
-    message: "Pessoa palestrante não encontrada"
+    message: 'Pessoa palestrante não encontrada',
+  });
+});
+
+app.post('/login', isValidEmail, isValidPassword, (req, res) => {
+  res.status(HTTP_OK_STATUS).json({
+    token: crypto.randomBytes(8).toString('hex'),
   });
 });
 
