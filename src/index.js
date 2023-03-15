@@ -2,7 +2,12 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs').promises;
 const crypto = require('crypto');
+const { join } = require('path');
 const { isValidEmail, isValidPassword } = require('./middleweres/validator');
+const { isValidtoken } = require('./middleweres/validToken');
+const { isValidName } = require('./middleweres/validName');
+const { isValidAge } = require('./middleweres/validAge');
+const { isValidtalk, talkRate, talkWatchedAT } = require('./middleweres/ValidTalker');
 
 const app = express();
 app.use(express.json());
@@ -36,6 +41,20 @@ app.post('/login', isValidEmail, isValidPassword, (req, res) => {
   res.status(HTTP_OK_STATUS).json({
     token: crypto.randomBytes(8).toString('hex'),
   });
+});
+
+app.post('/talker', isValidtoken, isValidName, isValidAge, isValidtalk,
+talkWatchedAT, talkRate, async (req, res) => {
+  const { name, age, talk } = req.body;
+  const talkers = await fs.readFile(path.resolve(__dirname, talkerRoute));
+  const data = JSON.parse(talkers);
+  console.log(data);
+
+  const resul = { id: data.length += 1, name, age, talk };
+
+  data.push(resul);
+  await fs.writeFile(join(__dirname, talkerRoute), JSON.stringify(data));
+  res.status(201).json(resul);
 });
 
 // não remova esse endpoint, e para o avaliador funcionar
