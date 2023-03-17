@@ -23,6 +23,16 @@ app.get('/talker', async (req, res) => {
   res.status(HTTP_OK_STATUS).json(data);
 });
 
+app.get('/talker/search', isValidtoken, async (req, res) => {
+  const { q } = req.query;
+  const talkers = await fs.readFile(path.resolve(__dirname, talkerRoute));
+  const data = JSON.parse(talkers);
+  console.log(data);
+  const resul = data.filter((a) => a.name.includes(q));
+  console.log(resul);
+  res.status(200).json(resul);
+});
+
 app.get('/talker/:id', async (req, res) => {
   const { id } = req.params;
   const talker = await fs.readFile(path.resolve(__dirname, talkerRoute));
@@ -49,7 +59,7 @@ talkWatchedAT, talkRate, async (req, res) => {
   const talkers = await fs.readFile(path.resolve(__dirname, talkerRoute));
   const data = JSON.parse(talkers);
 
-  const resul = { id: data.length += 1, name, age, talk };
+  const resul = { id: data.length + 1, name, age, talk };
 
   data.push(resul);
   await fs.writeFile(join(__dirname, talkerRoute), JSON.stringify(data));
