@@ -48,13 +48,43 @@ talkWatchedAT, talkRate, async (req, res) => {
   const { name, age, talk } = req.body;
   const talkers = await fs.readFile(path.resolve(__dirname, talkerRoute));
   const data = JSON.parse(talkers);
-  console.log(data);
 
   const resul = { id: data.length += 1, name, age, talk };
 
   data.push(resul);
   await fs.writeFile(join(__dirname, talkerRoute), JSON.stringify(data));
   res.status(201).json(resul);
+});
+
+app.put('/talker/:id', isValidtoken, isValidName, isValidAge, isValidtalk,
+talkWatchedAT, talkRate, async (req, res) => {
+  const { id } = req.params;
+  const talkers = await fs.readFile(path.resolve(__dirname, talkerRoute));
+  const data = JSON.parse(talkers);
+  const resp = data.filter((dat) => dat.id !== +id);
+  
+  if (resp.length === data.length) {
+    return res.status(404).json({
+      message: 'Pessoa palestrante não encontrada',
+    });
+  }
+  
+  const resul = { id: +id, ...req.body };
+
+  resp.push(resul);
+  await fs.writeFile(join(__dirname, talkerRoute), JSON.stringify(resp));
+
+  return res.status(200).json(resul);
+});
+
+app.delete('/talker/:id', isValidtoken, async (req, res) => {
+  const { id } = req.params;
+  const talkers = await fs.readFile(path.resolve(__dirname, talkerRoute));
+  const data = JSON.parse(talkers);
+
+  const resul = data.filter((a) => a.id !== +id);
+  await fs.writeFile(path.resolve(__dirname, talkerRoute), JSON.stringify(resul, null, 2));
+  res.status(204).json();
 });
 
 // não remova esse endpoint, e para o avaliador funcionar
